@@ -15,8 +15,15 @@ class Plotter:
 								height=self.height)
 		self.canvas.pack()
 		self.frame = 0
-		self.linecolor = "black"
-		self.fill = "white"
+		self.matrix = {
+			"linecolor": "black",
+			"fill": "white",
+			"origin_x": 0,
+			"origin_y": 0,
+			"rotation": 0,
+			"linewidth": 2,
+		}
+		self.matrixStack = []
 
 	def setup(self):
 		"""Sets up the window before the first frame goes.
@@ -39,22 +46,44 @@ class Plotter:
 		self.root.after(self.timestep, self._animate)
 		self.frame += 1
 
-	def rect(self, x, y, width, height, **kwargs):
+	def rect(self, x, y, width, height):
 		"""Draws a rectangle with top-left corner at x, y.  Returns id
 		of object"""
 
-		return self.canvas.create_rectangle(x, y, x + width, y + height, **kwargs)
+		x0 = x + self.matrix["origin_x"]
+		y0 = y + self.matrix["origin_y"]
+		x1 = x0 + width
+		y1 = y0 + width
+		return self.canvas.create_rectangle(x0, y0, x1, y1,
+								outline=self.matrix["linecolor"],
+								fill=self.matrix["fill"],
+								width=self.matrix["linewidth"])
 
-	def oval(self, x, y, width, height, **kwargs):
+	def oval(self, x, y, width, height):
 		"""Draws an oval with top-left corner at x, y.  Returns id of object"""
 
-		return self.canvas.create_oval(x, y, x + width, y + height, **kwargs)
+		x0 = x + self.matrix["origin_x"]
+		y0 = y + self.matrix["origin_y"]
+		x1 = x0 + width
+		y1 = y0 + height
+		return self.canvas.create_oval(x0, y0, x1, y1,
+								outline=self.matrix["linecolor"],
+								fill=self.matrix["fill"],
+								width=self.matrix["linewidth"])
 
-	def circle(self, x, y, r, **kwargs):
+	def circle(self, x, y, r):
 		"""Draws a circle (width = height) with center at x, y.  Returns
 		id of object"""
 
-		return self.canvas.create_oval(x - r, y - r, x + r, y + r, **kwargs)
+		x0 = x + self.matrix["origin_x"] - r 
+		y0 = y + self.matrix["origin_y"] - r 
+		x1 = x0 + 2*r 
+		y1 = y0 + 2*r
+
+		return self.canvas.create_oval(x0, y0, x1, y1,
+								outline=self.matrix["linecolor"],
+								fill=self.matrix["fill"],
+								width=self.matrix["linewidth"])
 
 	def clear(self):
 		"""Clears the whole canvas out"""
@@ -64,6 +93,22 @@ class Plotter:
 		"""Sets the background color of the canvas"""
 		self.canvas.configure(background=color)
 
+	def fill(self, color):
+		"""Sets the active fill to the current color"""
+		self.matrix["fill"] = color
+
+	def pushMatrix(self):
+		"""Saves the current major settings for unpacking later"""
+		self.matrixStack.append(self.matrix)
+
+	def popMatrix(self):
+		"""Pops a matrix off of the stack, restoring those settings"""
+		self.matrix = self.matrixStack.pop()
+
+	def translate(self, x, y):
+		"""Translates the origin to a proscribed x, y point"""
+		self.matrix["origin_x"] = x 
+		self.matrix["origin_y"] = y
 
 	def mainloop(self):
 		"""Runs the mainloop of the animation"""
