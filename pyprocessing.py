@@ -1,4 +1,5 @@
-import tkinter as tk 
+import tkinter as tk
+from math import sin, cos, radians, pi
 
 class Plotter:
 	"""Main controller class.  Basically simulates a processing
@@ -17,7 +18,7 @@ class Plotter:
 		self.frame = 0
 		self.matrix = {
 			"linecolor": "black",
-			"fill": "white",
+			"fill": "",
 			"origin_x": 0,
 			"origin_y": 0,
 			"rotation": 0,
@@ -39,6 +40,7 @@ class Plotter:
 		raise NotImplementedError("Draw method was not set")
 
 	def _animate(self):
+		"""Main animation mechanics for draw loop"""
 		try:
 			self.draw()
 		except NotImplementedError:
@@ -46,44 +48,55 @@ class Plotter:
 		self.root.after(self.timestep, self._animate)
 		self.frame += 1
 
+	def _toGlobal(self, x_local, y_local):
+		"""Converts local x, y to global x, y.
+		Returns tuple of pixel coords."""
+		theta = radians(self.matrix["rotation"])
+		x_global = self.matrix["origin_x"] + x_local*cos(theta) + y_local*sin(theta)
+		y_global = self.matrix["origin_y"] + y_local*cos(theta) - x_local*sin(theta)
+		return x_global, y_global
+
+
 	def rect(self, x, y, width, height):
 		"""Draws a rectangle with top-left corner at x, y.  Returns id
 		of object"""
 
-		x0 = x + self.matrix["origin_x"]
-		y0 = y + self.matrix["origin_y"]
-		x1 = x0 + width
-		y1 = y0 + width
-		return self.canvas.create_rectangle(x0, y0, x1, y1,
+		local_points = [(x, y), (x+width, y), (x+width, y+height), (x, y+height)]
+		global_points = []
+		for _x, _y in local_points:
+			global_points.append(self._toGlobal(_x, _y))
+
+		return self.canvas.create_polygon(
 								outline=self.matrix["linecolor"],
 								fill=self.matrix["fill"],
-								width=self.matrix["linewidth"])
+								width=self.matrix["linewidth"],
+								*global_points)
 
-	def oval(self, x, y, width, height):
+	def oval(self, x, y, width, height, resolution=20):
 		"""Draws an oval with top-left corner at x, y.  Returns id of object"""
+		global_points = []
+		theta = 0
+		theta_step = 2*pi/resolution
+		a = width/2
+		b = height/2
+		xc = x + a
+		yc = y + b
+		for i in range(resolution):
+			theta = theta + theta_step
+			x1 = a*cos(theta) + xc 
+			y1 = b*sin(theta) + yc 
+			global_points.append(self._toGlobal(x1, y1))
 
-		x0 = x + self.matrix["origin_x"]
-		y0 = y + self.matrix["origin_y"]
-		x1 = x0 + width
-		y1 = y0 + height
-		return self.canvas.create_oval(x0, y0, x1, y1,
+		return self.canvas.create_polygon(
 								outline=self.matrix["linecolor"],
 								fill=self.matrix["fill"],
-								width=self.matrix["linewidth"])
+								width=self.matrix["linewidth"],
+								*global_points)
 
-	def circle(self, x, y, r):
+	def circle(self, x, y, r, resolution=20):
 		"""Draws a circle (width = height) with center at x, y.  Returns
 		id of object"""
-
-		x0 = x + self.matrix["origin_x"] - r 
-		y0 = y + self.matrix["origin_y"] - r 
-		x1 = x0 + 2*r 
-		y1 = y0 + 2*r
-
-		return self.canvas.create_oval(x0, y0, x1, y1,
-								outline=self.matrix["linecolor"],
-								fill=self.matrix["fill"],
-								width=self.matrix["linewidth"])
+		return self.oval(x-r, y-r, 2*r, 2*r, resolution)
 
 	def clear(self):
 		"""Clears the whole canvas out"""
@@ -99,7 +112,7 @@ class Plotter:
 
 	def pushMatrix(self):
 		"""Saves the current major settings for unpacking later"""
-		self.matrixStack.append(self.matrix)
+		self.matrixStack.append(self.matrix.copy())
 
 	def popMatrix(self):
 		"""Pops a matrix off of the stack, restoring those settings"""
@@ -107,8 +120,22 @@ class Plotter:
 
 	def translate(self, x, y):
 		"""Translates the origin to a proscribed x, y point"""
-		self.matrix["origin_x"] = x 
-		self.matrix["origin_y"] = y
+		self.matrix["origin_x"] += x 
+		self.matrix["origin_y"] += y
+
+	def rotate(self, theta):
+		"""Rotates the origin reference frame by theta degrees.
+		Theta zero is positive x axis, positive theta is ccw"""
+		self.matrix["rotation"] = theta
+
+	def stroke(self, **kwargs):
+		"""Takes in some stroke variables and sets them.  Possible inputs:
+		width = sets the line width
+		color = sets the pen color"""
+		if "width" in kwargs:
+			self.matrix["linewidth"] = kwargs["width"]
+		if "color" in kwargs:
+			self.matrix["linecolor"] = kwargs["color"]
 
 	def mainloop(self):
 		"""Runs the mainloop of the animation"""

@@ -7,6 +7,7 @@
 - [ ] Incorporate decorators?
 - [ ] Manage upside down x, y axes?
 - [ ] Implement center modes for rect and oval?
-- [ ] Figure out whether or not I want to permit kwargs for pass throughs
-- [ ] Implement Rotate, more advanced function for x0, y0, x1, y1 calcs (sine/cos, etc)
+- [x] Figure out whether or not I want to permit kwargs for pass throughs
+- [x] Implement Rotate, more advanced function for x0, y0, x1, y1 calcs (sine/cos, etc)
+- [ ] Implement PVectors
 

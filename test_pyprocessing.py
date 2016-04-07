@@ -1,6 +1,6 @@
 import pyprocessing as proc 
 
-class TestPlot(proc.Plotter):
+class TestPlotDude(proc.Plotter):
 
 	def setup(self):
 		"""Adds a test setup method"""
@@ -13,6 +13,22 @@ class TestPlot(proc.Plotter):
 		self.clear()
 		d.update()
 		d.display()
+
+class TestPlotSimple(proc.Plotter):
+
+	def setup(self):
+		self.stroke(color='red')
+		self.rect(100, 100, 100, 50)
+		self.pushMatrix()
+		self.translate(200, 200)
+		self.rotate(15)
+		self.stroke(color='black')
+		self.rect(0,0,100, 50)
+		self.oval(100, 100, 50, 40, 50)
+		self.circle(50, 50, 200)
+		self.popMatrix()
+		self.rect(0, 0, 100, 50)
+
 
 
 class Dude:
@@ -45,6 +61,6 @@ class Dude:
 		self.plot.popMatrix()
 
 if __name__ == '__main__':
-	t = TestPlot()
-	d = Dude(t)
+	t = TestPlotSimple()
+	
 	t.mainloop()
