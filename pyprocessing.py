@@ -1,5 +1,5 @@
 import tkinter as tk
-from math import sin, cos, radians, pi
+from math import sin, asin, cos, acos, tan, atan2, radians, degrees, pi, sqrt
 
 class Plotter:
 	"""Main controller class.  Basically simulates a processing
@@ -144,3 +144,97 @@ class Plotter:
 		self.root.after(0, self._animate)
 		self.root.mainloop()
 
+class PVector:
+	"""Python implementation of Processing's PVector class, which is
+	(until I learn differently), basically a vector.  One might call
+	this one a... PYVector.  Heh.  Essentially it has an x and y component
+	which can be converted back and forth to angle and magnitude. 
+	Various supporting mathematical functions ensue.  I know that
+	there is most definitely already a python implementation of a vector
+	out there and that it is probably way better than this, but
+	I'm making this one for fun."""
+
+	def __init__(self, x, y):
+		self.x = x
+		self.y = y
+
+	def __str__(self):
+		return "<%f, %f>" % (self.x, self.y)
+
+	def __repr__(self):
+		return "<PVector: (%f, %f)>" % (self.x, self.y)
+
+	def __add__(self, other):
+		if isinstance(other, PVector):
+			return PVector(self.x + other.x, self.y + other.y)
+		else:
+			return PVector(self.x + other,self.y + other)
+
+	def __sub__(self, other):
+		if isinstance(other, PVector):
+			return PVector(self.x - other.x, self.y - other.y)
+		else:
+			return PVector(self.x - other, self.y - other)
+
+	def __mul__(self, other):
+		if isinstance(other, PVector):
+			return self.dot(other)
+		else:
+			return PVector(self.x * other, self.y * other)
+
+	def __div__(self, other):
+		return PVector(self.x / other, self.y / other)
+
+	def __neg__(self, other):
+		return PVector(-self.x, -self.y)
+
+	def cross(self, other):
+		"""Returns the cross product of self and other. 
+		Obviously since these are all 2D, cross product will
+		be in Z dimension only.  Return value is a floating
+		point number, in the k dimension"""
+
+		return (self.x * other.y) - (self.y - other.x)
+
+	def dot(self, other):
+		"""Returns the dot product of self and other"""
+
+		return self.x * other.x + self.y * other.y
+
+	def mag(self):
+		"""Returns the vectors magnitude"""
+		return sqrt(self.x**2 + self.y**2)
+
+	def theta(self, degrees=True):
+		"""Returns the vector's angle"""
+		if degrees:
+			return degrees(atan2(self.y, self.x))
+		else:
+			return atan2(self.y, self.x)
+
+	def setMag(self, magnitude):
+		"""Sets this vectors magnitude at same angle"""
+		mag = self.mag()
+		theta = self.theta(degrees=False)
+		self.x = magnitude*cos(theta)
+		self.y = magnitude*sin(theta)
+
+	def scale(self, factor):
+		"""Scales this vector's magnitude by a certain factor
+		while keeping the angle the same."""
+
+		self.setMag(factor*self.mag())
+
+	def norm(self):
+		"""Scales self to unit vector"""
+		self.setMag(1)
+
+	def rotate(self, angle):
+		"""Rotates vector by angle.  Positive theta ccw"""
+		theta = self.theta(degrees=False)
+		theta += radians(angle)
+		mag = self.mag()
+		self.x = mag*cos(theta)
+		self.y = mag*sin(theta)
+
+	
