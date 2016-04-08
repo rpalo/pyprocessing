@@ -11,6 +11,7 @@ class CA:
 	def __init__(self, plot, resolution=10, rule=90):
 		self.cells = []
 		self.ruleset = self.get_ruleset(rule)
+		print(self.ruleset)
 		self.resolution = resolution
 		self.plot = plot
 		for i in range(int(self.plot.width/self.resolution)):
@@ -50,7 +51,7 @@ class CA:
 		ruleset = [int(x) for x in bin(rule)[2:]]
 		while len(ruleset) < 8:
 			ruleset.insert(0, 0)
-		return ruleset
+		return ruleset[::-1]
 
 class CAPlot(Plotter):
 
@@ -66,7 +67,7 @@ class CAPlot(Plotter):
 if __name__ == '__main__':
 	p = CAPlot()
 	if len(sys.argv) > 1:
-		ca = CA(plot=p, rule=int(sys.argv[1]))
+		ca = CA(resolution=5,plot=p, rule=int(sys.argv[1]))
 	else:
 		ca = CA(plot=p)
 	p.CA = ca
