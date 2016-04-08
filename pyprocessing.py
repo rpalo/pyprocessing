@@ -194,7 +194,7 @@ class PVector:
 		be in Z dimension only.  Return value is a floating
 		point number, in the k dimension"""
 
-		return (self.x * other.y) - (self.y - other.x)
+		return (self.x * other.y) - (self.y * other.x)
 
 	def dot(self, other):
 		"""Returns the dot product of self and other"""
@@ -205,9 +205,9 @@ class PVector:
 		"""Returns the vectors magnitude"""
 		return sqrt(self.x**2 + self.y**2)
 
-	def theta(self, degrees=True):
+	def theta(self, degree=True):
 		"""Returns the vector's angle"""
-		if degrees:
+		if degree:
 			return degrees(atan2(self.y, self.x))
 		else:
 			return atan2(self.y, self.x)
@@ -215,7 +215,7 @@ class PVector:
 	def setMag(self, magnitude):
 		"""Sets this vectors magnitude at same angle"""
 		mag = self.mag()
-		theta = self.theta(degrees=False)
+		theta = self.theta(degree=False)
 		self.x = magnitude*cos(theta)
 		self.y = magnitude*sin(theta)
 
@@ -230,11 +230,13 @@ class PVector:
 		self.setMag(1)
 
 	def rotate(self, angle):
-		"""Rotates vector by angle.  Positive theta ccw"""
-		theta = self.theta(degrees=False)
+		"""Rotates vector by angle degrees.  Positive theta ccw"""
+		theta = self.theta(degree=False)
 		theta += radians(angle)
 		mag = self.mag()
 		self.x = mag*cos(theta)
 		self.y = mag*sin(theta)
 
-	
+	def get_angle_between(self, other):
+		return degrees(acos(self.dot(other)/(self.mag()*other.mag())))
+
